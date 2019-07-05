@@ -1,7 +1,5 @@
 # Implementing DDoS Detection
 
-## Getting Started
-
 This project is based on "Offloading Real-time DDoS Attack Detection to Programmable Data Planes" Project from [Ângelo Lapolli](https://github.com/aclapolli) and [Jonatas Marques](https://github.com/jonadmark/)
 
 ### Prerequisites
@@ -21,7 +19,7 @@ This is the proposed topology
 
 The last package of every observation window will be forwarded to the appropiates switches containing the following custom header:
 ```
-// EtherType 0xFD /** 253 - Used for experimentation and testing (RFC 3692 - Chap. 2.1) */
+// EtherType 0xFD /* 253 - Used for experimentation and testing (RFC 3692 - Chap. 2.1) */
 header ddosd_t {
     bit<32> packet_num;    // The packet number within the observation window (always equal to m)
     bit<32> src_entropy;   // The last observation window entropy of source IP addresses (scaled by 2^4)
