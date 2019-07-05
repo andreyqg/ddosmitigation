@@ -17,6 +17,8 @@ YFeel free to do MAKE. This compiles our P4 code, create the network devices in 
 This is the proposed topology
 ![topology](./Topology.png)
 
+
+The last package of every observation window will be forwarded to the appropiates switches containing the following custom header:
 ```
 // EtherType 0xFD /** 253 - Used for experimentation and testing (RFC 3692 - Chap. 2.1) */
 header ddosd_t {
@@ -31,6 +33,3 @@ header ddosd_t {
     bit<16> ether_type;    // Indicates the following header EtherType
 }
 ```
-
-
-![topology](./Topology.png)
