@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 #define ETHERTYPE_IPV4 0x0800
-#define PROTOCOL_DDOSD 0xFD /** 253 - Used for experimentation and testing (RFC 3692 - Chap. 2.1) */
+#define PROTOCOL_DDOSD 0xFD /* 253 - Used for experimentation and testing (RFC 3692 - Chap. 2.1) */
 
 #define CS_WIDTH 976
 
