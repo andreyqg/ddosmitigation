@@ -2,17 +2,17 @@
 
 ## Getting Started
 
-This project is based on DDoS Detection Project from [Ângelo Lapolli](https://github.com/aclapolli) and Jonatas A Marques[Jonatas Marques](https://github.com/jonadmark/)
+This project is based on "Offloading Real-time DDoS Attack Detection to Programmable Data Planes" Project from [Ângelo Lapolli](https://github.com/aclapolli) and [Jonatas Marques](https://github.com/jonadmark/)
 
 ### Prerequisites
 We have extended both the behavioral model and the P4 reference compiler (p4c) to support hashing as required by our count sketch.
 First, clone our forked repositories and follow the installation guidelines within:
 
-- [behavioral-model](https://github.com/andreyqg/behavioral-model)
-- [p4c](https://github.com/andreyqg/p4c)
+- [Behavioral Model](https://github.com/andreyqg/behavioral-model)
+- [P4_16 prototype compiler](https://github.com/andreyqg/p4c)
 
 #### Quick Start
-YFeel free to do MAKE. This compiles our P4 code, create the network devices in Mininet and load the necessary rules on the switches.
+Feel free to do MAKE. This compiles our P4 code, create the network devices in Mininet and load the necessary rules on the switches.
 
 This is the proposed topology
 
