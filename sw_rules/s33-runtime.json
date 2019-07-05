@@ -1,0 +1,226 @@
+{
+  "target": "bmv2",
+  "p4info": "build/ddosd.p4.p4info.txt",
+  "bmv2_json": "build/ddosd.json",
+  "table_entries": [
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "default_action": true,
+      "action_name": "MyIngress.drop",
+      "action_params": { }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.53.99", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 3
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.11.111", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 1
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.11.112", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 1
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.11.113", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 1
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.11.114", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 1
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.11.115", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 1
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.12.121", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 2
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.12.122", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 2
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.12.123", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 2
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.12.124", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 2
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.12.125", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 2
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.31.254", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 1
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.32.254", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 2
+      }
+    },
+    {
+      "table": "MyEgress.share_alarm",
+      "default_action": true,
+      "action_name": "MyEgress.set_session",
+      "action_params": {
+        "session_id": 0
+      }
+    },
+    {
+      "table": "MyEgress.share_alarm",
+      "match": {
+        "meta.key": 0
+      },
+      "action_name": "MyEgress.set_session",
+      "action_params": {
+        "session_id": 250
+      }
+    },
+    {
+      "table": "MyEgress.share_alarm",
+      "match": {
+        "meta.key": 1
+      },
+      "action_name": "MyEgress.set_session",
+      "action_params": {
+        "session_id": 251
+      }
+    },
+    {
+      "table": "MyEgress.write_mac",
+      "match": {
+        "standard_metadata.egress_port": 1
+      },
+      "action_name": "MyEgress.write_mac_addr",
+      "action_params": {
+        "srcAddr": "92:25:b9:25:66:a2",
+        "dstAddr": "42:ab:a6:de:e5:25"
+      }
+    },
+    {
+      "table": "MyEgress.write_mac",
+      "match": {
+        "standard_metadata.egress_port": 2
+      },
+      "action_name": "MyEgress.write_mac_addr",
+      "action_params": {
+        "srcAddr": "76:eb:6b:1f:4e:25",
+        "dstAddr": "e2:60:2a:42:14:6c"
+      }
+    },
+    {
+      "table": "MyEgress.write_mac",
+      "match": {
+        "standard_metadata.egress_port": 3
+      },
+      "action_name": "MyEgress.write_mac_addr",
+      "action_params": {
+        "srcAddr": "8a:ab:ec:8a:27:8b",
+        "dstAddr": "9e:52:3a:69:b0:a5"
+      }
+    },
+    {
+      "table": "MyEgress.write_ip",
+      "match": {
+        "meta.key": 0
+      },
+      "action_name": "MyEgress.write_ip_addr",
+      "action_params": {
+        "srcAddr": "10.0.33.254",
+        "dstAddr": "10.0.31.254"
+      }
+    },
+    {
+      "table": "MyEgress.write_ip",
+      "match": {
+        "meta.key": 1
+      },
+      "action_name": "MyEgress.write_ip_addr",
+      "action_params": {
+        "srcAddr": "10.0.33.254",
+        "dstAddr": "10.0.32.254"
+      }
+    }
+  ]
+}

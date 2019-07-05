@@ -1,0 +1,105 @@
+{
+  "target": "bmv2",
+  "p4info": "build/ddosd.p4.p4info.txt",
+  "bmv2_json": "build/ddosd.json",
+  "table_entries": [
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "default_action": true,
+      "action_name": "MyIngress.drop",
+      "action_params": { }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.53.99", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 2
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.21.211", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 1
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.21.212", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 1
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.21.213", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 1
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.21.214", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 1
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.21.215", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 1
+      }
+    },
+    {
+      "table": "MyIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dstAddr": ["10.0.23.254", 32]
+      },
+      "action_name": "MyIngress.ipv4_forward",
+      "action_params": {
+        "port": 1
+      }
+    },
+    {
+      "table": "MyEgress.write_mac",
+      "match": {
+        "standard_metadata.egress_port": 1
+      },
+      "action_name": "MyEgress.write_mac_addr",
+      "action_params": {
+        "srcAddr": "fa:89:3e:44:4d:e4",
+        "dstAddr": "ea:9d:3d:20:5a:54"
+      }
+    },
+    {
+      "table": "MyEgress.write_mac",
+      "match": {
+        "standard_metadata.egress_port": 2
+      },
+      "action_name": "MyEgress.write_mac_addr",
+      "action_params": {
+        "srcAddr": "e2:b3:6b:28:73:8e",
+        "dstAddr": "1a:f1:b4:d8:24:80"
+      }
+    }
+  ]
+}
