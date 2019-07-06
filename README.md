@@ -29,6 +29,6 @@ header ddosd_t {
     bit<32> dst_ewma;      // The current EWMA for the entropy of destination IP address (scaled by 2^18)
     bit<32> dst_ewmmd;     // The current EWMMD for the entropy of destination IP address (scaled by 2^18)
     bit<8> alarm;          // It is set to 0x01 to indicate the detection of a DDoS attack
-    bit<16> ether_type;    // Indicates the following header EtherType
+    bit<16> protocol;      // Indicates the following header EtherType
 }
 ```
