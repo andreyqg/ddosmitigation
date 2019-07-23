@@ -6,6 +6,7 @@
 #define PROTOCOL_DDOSD 0xFD /** 253 - Used for experimentation and testing (RFC 3692 - Chap. 2.1) */
 
 #define CS_WIDTH 976
+#define HHD 1400
 
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
@@ -68,6 +69,15 @@ struct metadata {
     bit<8> trigow; /* Status of observation window 1:Finished */
     bit<8> first_device; /* Network device identifier 0:Core, 1:Edge */
     bit<8> attack; /* Network device status 0:Normal, 1:On attack detected */
+    bit<1> hhd_d; /* Stage heavy hitter detection*/
+    bit<32> hhd_key_carried; /* Key packet */
+    bit<32> hhd_count_carried; /* Counter for packet key */
+    bit<32> hhd_index; /* Table slot based on hash function */
+    bit<32> hhd_key_table; /* Value key in table */
+    bit<32> hhd_count_table; /* Counter value in table */
+    bit<32> hhd_key_swap; /* Swap key carried and table */
+    bit<32> hhd_count_swap; /* Swap counter carried and table */
+    bit<32> hhd_swapped; /* Indicator if swapped */
 }
 
 struct headers {
@@ -115,7 +125,6 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
           verify_checksum(true, {hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.dscp, hdr.ipv4.ecn, hdr.ipv4.total_len, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.frag_offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr}, hdr.ipv4.hdr_checksum, HashAlgorithm.csum16);
     }
 }
-
 
 /*************************************************************************
 **************  I N G R E S S   P R O C E S S I N G   *******************
@@ -168,6 +177,20 @@ control MyIngress(inout headers hdr,inout metadata meta,inout standard_metadata_
     // Network device position and status
     register<bit<8>>(1) device_position;
     register<bit<8>>(1) device_status;
+
+    // Heavy Hitter Detection Key and Counter for each stage
+    register<bit<32>>(HHD) key_1;
+    register<bit<32>>(HHD) count_1;
+    register<bit<32>>(HHD) key_2;
+    register<bit<32>>(HHD) count_2;
+    register<bit<32>>(HHD) key_3;
+    register<bit<32>>(HHD) count_3;
+    register<bit<32>>(HHD) key_4;
+    register<bit<32>>(HHD) count_4;
+    register<bit<32>>(HHD) key_5;
+    register<bit<32>>(HHD) count_5;
+    register<bit<32>>(HHD) key_6;
+    register<bit<32>>(HHD) count_6;
 
     action drop() {
         mark_to_drop(standard_metadata);
@@ -254,7 +277,189 @@ control MyIngress(inout headers hdr,inout metadata meta,inout standard_metadata_
             y = (x1 + x2) >> 1;
     }
 
+
     apply {
+
+        //######################################################################
+        //######################################################################
+        //              ***** HEAVY HITTER DETECTION ******
+        //######################################################################
+        //######################################################################
+
+        meta.hhd_key_carried = hdr.ipv4.dstAddr;
+        meta.hhd_count_carried = 1;
+
+        hash(meta.hhd_index, HashAlgorithm.d1, 32w0, {meta.hhd_key_carried}, 32w0xffffffff);
+
+
+        // Read key and counter in slot
+        key_1.read(meta.hhd_key_table,meta.hhd_index);
+        count_1.read(meta.hhd_count_table,meta.hhd_index);
+
+        meta.hhd_swapped = 0;
+        if (meta.hhd_key_table == meta.hhd_key_carried){
+            meta.hhd_count_table = meta.hhd_count_table + 1;
+        } else if (meta.hhd_key_table == 0){
+            meta.hhd_key_table = meta.hhd_key_carried;
+            meta.hhd_count_table = meta.hhd_count_carried;
+        } else {
+            meta.hhd_key_swap = meta.hhd_key_table;
+            meta.hhd_count_swap = meta.hhd_count_table;
+            meta.hhd_key_table = meta.hhd_key_carried;
+            meta.hhd_count_table = meta.hhd_count_carried;
+            meta.hhd_key_carried = meta.hhd_key_swap;
+            meta.hhd_count_carried = meta.hhd_count_swap;
+            meta.hhd_swapped = 1;
+        }
+
+        key_1.write(meta.hhd_index,meta.hhd_key_table);
+        count_1.write(meta.hhd_index,meta.hhd_count_table);
+
+        /* Stage 2 */
+        if (meta.hhd_swapped == 1){
+
+            hash(meta.hhd_index, HashAlgorithm.d2, 32w0, {meta.hhd_key_carried}, 32w0xffffffff);
+
+            key_2.read(meta.hhd_key_table,meta.hhd_index);
+            count_2.read(meta.hhd_count_table,meta.hhd_index);
+
+            meta.hhd_swapped = 1;
+            if (meta.hhd_key_table == meta.hhd_key_carried){
+                meta.hhd_count_table = meta.hhd_count_table + 1;
+                meta.hhd_swapped = 0;
+            } else if (meta.hhd_key_table == 0){
+                meta.hhd_key_table = meta.hhd_key_carried;
+                meta.hhd_count_table = meta.hhd_count_carried;
+                meta.hhd_swapped = 0;
+            } else if (meta.hhd_count_table < meta.hhd_count_carried){
+                meta.hhd_key_swap = meta.hhd_key_table;
+                meta.hhd_count_swap = meta.hhd_count_table;
+                meta.hhd_key_table = meta.hhd_key_carried;
+                meta.hhd_count_table = meta.hhd_count_carried;
+                meta.hhd_key_carried = meta.hhd_key_swap;
+                meta.hhd_count_carried = meta.hhd_count_swap;
+            }
+            key_2.write(meta.hhd_index,meta.hhd_key_table);
+            count_2.write(meta.hhd_index,meta.hhd_count_table);
+        }
+
+        /* Stage 3 */
+        if (meta.hhd_swapped == 1){
+
+            hash(meta.hhd_index, HashAlgorithm.d3, 32w0, {meta.hhd_key_carried}, 32w0xffffffff);
+
+            key_3.read(meta.hhd_key_table,meta.hhd_index);
+            count_3.read(meta.hhd_count_table,meta.hhd_index);
+
+            meta.hhd_swapped = 1;
+            if (meta.hhd_key_table == meta.hhd_key_carried){
+                meta.hhd_count_table = meta.hhd_count_table + 1;
+                meta.hhd_swapped = 0;
+            } else if (meta.hhd_key_table == 0){
+                meta.hhd_key_table = meta.hhd_key_carried;
+                meta.hhd_count_table = meta.hhd_count_carried;
+                meta.hhd_swapped = 0;
+            } else if (meta.hhd_count_table < meta.hhd_count_carried){
+                meta.hhd_key_swap = meta.hhd_key_table;
+                meta.hhd_count_swap = meta.hhd_count_table;
+                meta.hhd_key_table = meta.hhd_key_carried;
+                meta.hhd_count_table = meta.hhd_count_carried;
+                meta.hhd_key_carried = meta.hhd_key_swap;
+                meta.hhd_count_carried = meta.hhd_count_swap;
+            }
+            key_3.write(meta.hhd_index,meta.hhd_key_table);
+            count_3.write(meta.hhd_index,meta.hhd_count_table);
+        }
+
+        /* Stage 4 */
+        if (meta.hhd_swapped == 1){
+
+            hash(meta.hhd_index, HashAlgorithm.d4, 32w0, {meta.hhd_key_carried}, 32w0xffffffff);
+
+            key_4.read(meta.hhd_key_table,meta.hhd_index);
+            count_4.read(meta.hhd_count_table,meta.hhd_index);
+
+            meta.hhd_swapped = 1;
+            if (meta.hhd_key_table == meta.hhd_key_carried){
+                meta.hhd_count_table = meta.hhd_count_table + 1;
+                meta.hhd_swapped = 0;
+            } else if (meta.hhd_key_table == 0){
+                meta.hhd_key_table = meta.hhd_key_carried;
+                meta.hhd_count_table = meta.hhd_count_carried;
+                meta.hhd_swapped = 0;
+            } else if (meta.hhd_count_table < meta.hhd_count_carried){
+                meta.hhd_key_swap = meta.hhd_key_table;
+                meta.hhd_count_swap = meta.hhd_count_table;
+                meta.hhd_key_table = meta.hhd_key_carried;
+                meta.hhd_count_table = meta.hhd_count_carried;
+                meta.hhd_key_carried = meta.hhd_key_swap;
+                meta.hhd_count_carried = meta.hhd_count_swap;
+            }
+            key_4.write(meta.hhd_index,meta.hhd_key_table);
+            count_4.write(meta.hhd_index,meta.hhd_count_table);
+        }
+
+        /* Stage 5 */
+        if (meta.hhd_swapped == 1){
+
+            hash(meta.hhd_index, HashAlgorithm.d5, 32w0, {meta.hhd_key_carried}, 32w0xffffffff);
+
+            key_5.read(meta.hhd_key_table,meta.hhd_index);
+            count_5.read(meta.hhd_count_table,meta.hhd_index);
+
+            meta.hhd_swapped = 1;
+            if (meta.hhd_key_table == meta.hhd_key_carried){
+                meta.hhd_count_table = meta.hhd_count_table + 1;
+                meta.hhd_swapped = 0;
+            } else if (meta.hhd_key_table == 0){
+                meta.hhd_key_table = meta.hhd_key_carried;
+                meta.hhd_count_table = meta.hhd_count_carried;
+                meta.hhd_swapped = 0;
+            } else if (meta.hhd_count_table < meta.hhd_count_carried){
+                meta.hhd_key_swap = meta.hhd_key_table;
+                meta.hhd_count_swap = meta.hhd_count_table;
+                meta.hhd_key_table = meta.hhd_key_carried;
+                meta.hhd_count_table = meta.hhd_count_carried;
+                meta.hhd_key_carried = meta.hhd_key_swap;
+                meta.hhd_count_carried = meta.hhd_count_swap;
+            }
+            key_5.write(meta.hhd_index,meta.hhd_key_table);
+            count_5.write(meta.hhd_index,meta.hhd_count_table);
+        }
+
+        /* Stage 6 */
+        if (meta.hhd_swapped == 1){
+
+            hash(meta.hhd_index, HashAlgorithm.d6, 32w0, {meta.hhd_key_carried}, 32w0xffffffff);
+
+            key_6.read(meta.hhd_key_table,meta.hhd_index);
+            count_6.read(meta.hhd_count_table,meta.hhd_index);
+
+            meta.hhd_swapped = 1;
+            if (meta.hhd_key_table == meta.hhd_key_carried){
+                meta.hhd_count_table = meta.hhd_count_table + 1;
+                meta.hhd_swapped = 0;
+            } else if (meta.hhd_key_table == 0){
+                meta.hhd_key_table = meta.hhd_key_carried;
+                meta.hhd_count_table = meta.hhd_count_carried;
+                meta.hhd_swapped = 0;
+            } else if (meta.hhd_count_table < meta.hhd_count_carried){
+                meta.hhd_key_swap = meta.hhd_key_table;
+                meta.hhd_count_swap = meta.hhd_count_table;
+                meta.hhd_key_table = meta.hhd_key_carried;
+                meta.hhd_count_table = meta.hhd_count_carried;
+                meta.hhd_key_carried = meta.hhd_key_swap;
+                meta.hhd_count_carried = meta.hhd_count_swap;
+            }
+            key_6.write(meta.hhd_index,meta.hhd_key_table);
+            count_6.write(meta.hhd_index,meta.hhd_count_table);
+        }
+
+        //######################################################################
+        //######################################################################
+        //              ***** END HEAVY HITTER DETECTION ******
+        //######################################################################
+        //######################################################################
 
         device_status.read(meta.attack,0);
         device_position.read(meta.first_device,0);
@@ -264,16 +469,10 @@ control MyIngress(inout headers hdr,inout metadata meta,inout standard_metadata_
         } else {
             //Adjust observation window and threshold when alarm packet is received and device is not alarmed
             if (hdr.ipv4.protocol == 0xFD && meta.attack == 0){
-                bit<32> copy_training_len;
-                training_len.read(copy_training_len,0);
-                training_len.write(0,copy_training_len/2);
-
                 bit<8> copy_k;
                 k.read(copy_k,0);
                 k.write(0,copy_k/2);
             }
-
-
 
             //Initialize trigger observation window
             meta.trigow = 0;
