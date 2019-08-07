@@ -153,7 +153,7 @@
     {
       "table": "MyEgress.write_ip",
       "match": {
-        "meta.key": 0
+        "meta.key_write_ip": 0
       },
       "action_name": "MyEgress.write_ip_addr",
       "action_params": {
@@ -164,7 +164,7 @@
     {
       "table": "MyEgress.write_ip",
       "match": {
-        "meta.key": 1
+        "meta.key_write_ip": 1
       },
       "action_name": "MyEgress.write_ip_addr",
       "action_params": {
