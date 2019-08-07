@@ -20,7 +20,7 @@ This is the proposed topology
 The last package of every observation window will be forwarded to the appropiates switches containing the following custom header:
 ```
 // EtherType 0xFD /* 253 - Used for experimentation and testing (RFC 3692 - Chap. 2.1) */
-header ddosd_t {
+header DDOSD {
     bit<32> packet_num;    // The packet number within the observation window (always equal to m)
     bit<32> src_entropy;   // The last observation window entropy of source IP addresses (scaled by 2^4)
     bit<32> src_ewma;      // The current EWMA for the entropy of source IP address (scaled by 2^18)
@@ -29,6 +29,10 @@ header ddosd_t {
     bit<32> dst_ewma;      // The current EWMA for the entropy of destination IP address (scaled by 2^18)
     bit<32> dst_ewmmd;     // The current EWMMD for the entropy of destination IP address (scaled by 2^18)
     bit<8> alarm;          // It is set to 0x01 to indicate the detection of a DDoS attack
-    bit<16> protocol;      // Indicates the following header EtherType
+    bit<8> protocol;       // Indicates the following header TCP
+    bit<8> count_ip;       // Number of IP in alarm packet
+    
+header ALARM {
+    bit<32> ip_alarm;      // IP Address for check
 }
 ```
