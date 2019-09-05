@@ -35,7 +35,6 @@ header DDOSD {
 header ALARM {
     bit<32> ip_alarm;      // IP Address suspects for checking
 }
-
 ```
 
 When the switch generates this Alarm Packet, our switch will begin to traffic filtering for IP Address suspects and send this list to the next level switch for verification.
