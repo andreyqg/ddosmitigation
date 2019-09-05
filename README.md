@@ -30,7 +30,7 @@ header DDOSD {
     bit<32> dst_ewmmd;     // The current EWMMD for the entropy of destination IP address (scaled by 2^18)
     bit<8> alarm;          // It is set to 0x01 to indicate the detection of a DDoS attack
     bit<8> protocol;       // Indicates the following header TCP
-    bit<8> count_ip;       // Number of IP in alarm packet
+    bit<8> count_ip;       // Number of IP Address in alarm packet
     
 header ALARM {
     bit<32> ip_alarm;      // IP Address suspects for checking
