@@ -12,7 +12,7 @@ First, clone our forked repositories and follow the installation guidelines with
 #### Quick Start
 Feel free to do MAKE. This compiles our P4 code, create the network devices in Mininet and load the necessary rules on the switches (For CLI and Runtime).
 
-This is the proposed topology
+This is the proposed topology (The red color indicates that device is running our mechanism)
 
 ![topology](./Topology.png)
 
