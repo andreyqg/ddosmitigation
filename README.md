@@ -10,13 +10,13 @@ First, clone our forked repositories and follow the installation guidelines with
 - [P4_16 prototype compiler](https://github.com/andreyqg/p4c)
 
 #### Quick Start
-Feel free to do MAKE. This compiles our P4 code, create the network devices in Mininet and load the necessary rules on each switches (via CLI and Runtime).
+Feel free to do MAKE. This compiles our P4 code, create the network devices in Mininet and load the necessary rules on each switch (via CLI and Runtime).
 
 This is the proposed topology (The red color indicates that device is running our mechanism)
 
 ![topology](./Topology.png)
 
-The Dection Mechanism is configured with '8192' (2<sup>14</sup>) packet for each observation window
+The Detection  Mechanism is configured with '8192' (2<sup>14</sup>) packet for each observation window
 
 In case of Attack Detection, the last package of every observation window will be forwarded to the appropiates switches containing the following custom header:
 ```
