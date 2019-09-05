@@ -228,6 +228,16 @@
       }
     },
     {
+      "table": "MyEgress.share_alarm",
+      "match": {
+        "meta.key": 2
+      },
+      "action_name": "MyEgress.set_session",
+      "action_params": {
+        "session_id": 252
+      }
+    },
+    {
       "table": "MyEgress.write_mac",
       "match": {
         "standard_metadata.egress_port": 1
@@ -279,8 +289,19 @@
       "action_name": "MyEgress.write_ip_addr",
       "action_params": {
         "srcAddr": "10.0.53.254",
-        "dstAddr": "10.0.53.99"
+        "dstAddr": "10.0.42.254"
       }
+  },
+  {
+    "table": "MyEgress.write_ip",
+    "match": {
+      "meta.key_write_ip": 2
+    },
+    "action_name": "MyEgress.write_ip_addr",
+    "action_params": {
+      "srcAddr": "10.0.53.254",
+      "dstAddr": "10.0.53.99"
     }
+  }
   ]
 }

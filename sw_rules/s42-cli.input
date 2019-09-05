@@ -1,10 +1,9 @@
 mirroring_add 250 1
 
-register_write MyIngress.log2_m 0 9
-register_write MyIngress.training_len 0 50
-register_write MyIngress.alpha 0 10
-register_write MyIngress.k 0 14
-register_write MyIngress.device_position 0 0
+register_write MyIngress.log2_m 0 6
+register_write MyIngress.training_len 0 4
+register_write MyIngress.alpha 0 20
+register_write MyIngress.k 0 28
 register_write MyIngress.device_status 0 0
 
 table_clear MyIngress.src_entropy_term
