@@ -1,4 +1,4 @@
-3/* -*- P4_16 -*- */
+/* -*- P4_16 -*- */
 #include <core.p4>
 #include <v1model.p4>
 
@@ -678,6 +678,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
     register<bit<32>>(1) index_total;
 
     register<bit<32>>(HHD) ipblocker; // Register with IP Address to blocking
+    register<bit<32>>(HHD) ipreceived; // Register with IP Address received into Alarm PacketIn
 
     action drop() {
         mark_to_drop(standard_metadata);
@@ -737,8 +738,8 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
 
         if(meta.ib_source == meta.ib_read){ /* meta.ib_source == meta.ib_read */
             hash(meta.timestamp_hashed, HashAlgorithm.d1, 32w0, {meta.timestamp}, 32w0xffffffff);
-            if (meta.timestamp_hashed > 700){
-                drop(); /* Block packet if IP Address match in IPBlocker */
+            if (meta.timestamp_hashed > 300){
+                drop(); /* Block 70% of packet if IP Address match in IPBlocker */
             }
 
         } else {
@@ -1120,7 +1121,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                     if (hdr.ipv4.protocol == 0xFD && hdr.ddosd.count_ip != 0){
                         meta.ib_address = hdr.alarm[0].ip_alarm;
                         hash(meta.ib_index, HashAlgorithm.d1, 32w0, {meta.ib_address}, 32w0xffffffff);
-                        ipblocker.write(meta.ib_index, meta.ib_address);
+                        ipreceived.write(meta.ib_index, meta.ib_address);
                         hdr.ddosd.count_ip = hdr.ddosd.count_ip - 1;
                         hdr.alarm.pop_front(1);
                         recirculate(meta);
