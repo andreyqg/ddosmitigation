@@ -115,6 +115,7 @@ struct metadata {
     bit<32> ib_source; /* IP source address to verify in IP Blocker*/
     bit<32> ib_ind; /* IP Blocker index when read*/
     bit<32> ib_read; /* IP address readed into IP Blocker*/
+    bit<32> ir_read; /* IP address readed into IP Received*/
 
 }
 
@@ -735,13 +736,15 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
         meta.ib_source = hdr.ipv4.srcAddr;
         hash(meta.ib_ind, HashAlgorithm.d1, 32w0, {meta.ib_source}, 32w0xffffffff);
         ipblocker.read(meta.ib_read,meta.ib_ind);
+        ipreceived.read(meta.ir_read,meta.ib_ind);
 
         if(meta.ib_source == meta.ib_read){ /* meta.ib_source == meta.ib_read */
             hash(meta.timestamp_hashed, HashAlgorithm.d1, 32w0, {meta.timestamp}, 32w0xffffffff);
-            if (meta.timestamp_hashed > 300){
+            if (meta.timestamp_hashed > 420){
                 drop(); /* Block 70% of packet if IP Address match in IPBlocker */
             }
-
+        }else if(meta.ib_source == meta.ir_read){
+            ipblocker.write(meta.ib_ind,meta.ib_source);
         } else {
             if (hdr.ipv4.isValid() && meta.alarm_pktin != 1) {
                 write_mac.apply();
@@ -785,6 +788,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                                 key_total.write(meta.hhd_index_total,meta.hhd_key_carried);
                                 meta.hhd_index_total = meta.hhd_index_total + 1;
                                 meta.hhd_ow_table = meta.ow;
+                                ipblocker.write(meta.hhd_index,meta.hhd_key_carried);
                             }
                         } else {
                             meta.hhd_key_swap = meta.hhd_key_table;
@@ -832,6 +836,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                                     key_total.write(meta.hhd_index_total,meta.hhd_key_carried);
                                     meta.hhd_index_total = meta.hhd_index_total + 1;
                                     meta.hhd_ow_table= meta.ow;
+                                    ipblocker.write(meta.hhd_index,meta.hhd_key_carried);
                                 }
                             } else if (meta.hhd_count_table < meta.hhd_count_carried){
                                 meta.hhd_key_swap = meta.hhd_key_table;
@@ -880,6 +885,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                                     key_total.write(meta.hhd_index_total,meta.hhd_key_carried);
                                     meta.hhd_index_total = meta.hhd_index_total + 1;
                                     meta.hhd_ow_table= meta.ow;
+                                    ipblocker.write(meta.hhd_index,meta.hhd_key_carried);
                                 }
                             } else if (meta.hhd_count_table < meta.hhd_count_carried){
                                 meta.hhd_key_swap = meta.hhd_key_table;
@@ -928,6 +934,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                                     key_total.write(meta.hhd_index_total,meta.hhd_key_carried);
                                     meta.hhd_index_total = meta.hhd_index_total + 1;
                                     meta.hhd_ow_table= meta.ow;
+                                    ipblocker.write(meta.hhd_index,meta.hhd_key_carried);
                                 }
                             } else if (meta.hhd_count_table < meta.hhd_count_carried){
                                 meta.hhd_key_swap = meta.hhd_key_table;
@@ -976,6 +983,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                                     key_total.write(meta.hhd_index_total,meta.hhd_key_carried);
                                     meta.hhd_index_total = meta.hhd_index_total + 1;
                                     meta.hhd_ow_table= meta.ow;
+                                    ipblocker.write(meta.hhd_index,meta.hhd_key_carried);
                                 }
                             } else if (meta.hhd_count_table < meta.hhd_count_carried){
                                 meta.hhd_key_swap = meta.hhd_key_table;
@@ -1024,6 +1032,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                                     key_total.write(meta.hhd_index_total,meta.hhd_key_carried);
                                     meta.hhd_index_total = meta.hhd_index_total + 1;
                                     meta.hhd_ow_table= meta.ow;
+                                    ipblocker.write(meta.hhd_index,meta.hhd_key_carried);
                                 }
                             } else if (meta.hhd_count_table < meta.hhd_count_carried){
                                 meta.hhd_key_swap = meta.hhd_key_table;
