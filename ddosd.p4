@@ -80,6 +80,7 @@ struct metadata {
     bit<8> mirror_session_id; /* Mirror session */
     bit<8> trigow; /* Status of observation window 1:Finished */
     bit<8> first_device; /* Network device identifier 0:Core, 1:Edge */
+    bit<8> features; /* Indicates switch features */
     bit<8> attack; /* Network device status 0:Only Forwarding, 1:Mechanism running, 2:Mechanism running and k halved */
     bit<32> timestamp; /* Ingress timestamp to generate hash and filtering malicious traffic */
     bit<32> timestamp_hashed; /* Hash of timestamp for filtering */
@@ -225,8 +226,8 @@ control MyIngress(inout headers hdr,inout metadata meta,inout standard_metadata_
     register<bit<8>>(1) alpha;    // Fixed point representation: 0 integer bits, 8 fractional bits.
     register<bit<8>>(1) k;        // Fixed point representation: 5 integer bits, 3 fractional bits.
 
-    // Network device position and status
-    //register<bit<8>>(1) device_position;
+    // Network device status and features
+    //register<bit<8>>(1) features;
     register<bit<8>>(1) device_status;
     register<bit<9>>(1) ack_port;
 
@@ -680,6 +681,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
 
     register<bit<32>>(HHD) ipblocker; // Register with IP Address to blocking
     register<bit<32>>(HHD) ipreceived; // Register with IP Address received into Alarm PacketIn
+    register<bit<8>>(1) features; //Register indicates features of switch
 
     action drop() {
         mark_to_drop(standard_metadata);
@@ -737,6 +739,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
         hash(meta.ib_ind, HashAlgorithm.d1, 32w0, {meta.ib_source}, 32w0xffffffff);
         ipblocker.read(meta.ib_read,meta.ib_ind);
         ipreceived.read(meta.ir_read,meta.ib_ind);
+        features.read(meta.features,0);
 
         if(meta.ib_source == meta.ib_read){ /* meta.ib_source == meta.ib_read */
             hash(meta.timestamp_hashed, HashAlgorithm.d1, 32w0, {meta.timestamp}, 32w0xffffffff);
@@ -752,7 +755,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                     share_alarm.apply();
                 }
 
-                if (standard_metadata.instance_type == NORMAL && meta.recirculated != 1){
+                if (standard_metadata.instance_type == NORMAL && meta.recirculated != 1 && meta.features == 1){
 
                     //######################################################################
                     //######################################################################
