@@ -1,7 +1,7 @@
 {
   "target": "bmv2",
   "p4info": "build/ddosd.p4.p4info.txt",
-  "bmv2_json": "build/ddosd.json",
+  "bmv2_json": "build/ddosmit.json",
   "table_entries": [
     {
       "table": "MyIngress.ipv4_lpm",
