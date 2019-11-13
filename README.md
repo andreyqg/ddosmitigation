@@ -7,7 +7,7 @@ We have extended both the behavioral model and the P4 reference compiler (p4c) t
 First, clone our forked repositories and follow the installation guidelines within:
 
 - [Behavioral Model](https://github.com/andreyqg/behavioral-model)
-- [P4_16 prototype compiler](https://github.com/andreyqg/p4c)
+- [P4_16 compiler](https://github.com/andreyqg/p4c)
 
 #### Quick Start
 Feel free to do MAKE. This compiles our P4 code, create the network devices in Mininet and load the necessary rules on each switch (via CLI and Runtime).
