@@ -1,4 +1,4 @@
-# Implementing In-Network DDoS Mitigation
+# Implementing DDoS Attacks Collaborative Mitigation Mechanism
 
 This project is based on "[Offloading Real-time DDoS Attack Detection to Programmable Data Planes](https://ieeexplore.ieee.org/document/8717869)" (IM 2019) Project from [Ângelo Lapolli](https://github.com/aclapolli) and [Jonatas Marques](https://github.com/jonadmark/)
 
