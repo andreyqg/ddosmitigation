@@ -1,3 +1,7 @@
+// ###############################################
+// #** DDoS Collaborative Mitigation Mechanism **#  
+// ###############################################
+
 /* -*- P4_16 -*- */
 #include <core.p4>
 #include <v1model.p4>
@@ -751,6 +755,8 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
         inspectionlist.read(meta.il_read,meta.sl_ind);
         features.read(meta.features,0);
 
+        index_total.read(meta.hhd_index_total,0);
+
         if(meta.sl_source == meta.sl_read){ 
             hash(meta.timestamp_hashed, HashAlgorithm.d1, 32w0, {meta.timestamp}, 32w0xffffffff);
             if (meta.timestamp_hashed > 420){
@@ -758,7 +764,6 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
             }
         }else if(meta.sl_source == meta.il_read){
             suspectlist.write(meta.sl_ind,meta.sl_source);
-            index_total.read(meta.hhd_index_total,0);
             key_total.write(meta.hhd_index_total,meta.sl_source);
             meta.hhd_index_total = meta.hhd_index_total + 1;
             index_total.write(0,meta.hhd_index_total);
@@ -781,8 +786,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                     meta.hhd_count_carried = 1;
                     //meta.hhd_ow_carried = 0;
                     meta.hhd_thresh = 2;
-                    index_total.read(meta.hhd_index_total,0);
-
+                    
                     hash(meta.hhd_index, HashAlgorithm.d1, 32w0, {meta.hhd_key_carried}, 32w0xffffffff);
 
                     // Read key and counter in slot
