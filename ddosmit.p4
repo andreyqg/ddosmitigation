@@ -701,6 +701,16 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
         default_action = set_session(0);
     }
 
+    table share_notification {
+        key = {
+            meta.key: exact;
+        }
+        actions = {
+            set_session;
+        }
+        default_action = set_session(0);
+    }
+
     action write_mac_addr (macAddr_t srcAddr, macAddr_t dstAddr) {
         hdr.ethernet.srcAddr = srcAddr;
         hdr.ethernet.dstAddr = dstAddr;
@@ -763,7 +773,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
 
                     //######################################################################
                     //######################################################################
-                    //              ***** HEAVY HITTER DETECTION ******
+                    //         ***** FLOW STATISTICS / SUSPECT IDENTIFICATION ******
                     //######################################################################
                     //######################################################################
 
@@ -1068,7 +1078,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
 
                     //######################################################################
                     //######################################################################
-                    //              ***** END HEAVY HITTER DETECTION ******
+                    //       ***** END FLOW STATISTICS / SUSPECT IDENTIFICATION ******
                     //######################################################################
                     //######################################################################
 
