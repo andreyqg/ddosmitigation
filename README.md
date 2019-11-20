@@ -14,7 +14,7 @@ Feel free to do MAKE. This compiles our P4 code, create the network devices in M
 
 This is the proposed topology (The red color indicates that device is running our mechanism)
 
-![topology](./Topology.png)
+![topology](./Topology.pdf)
 
 The Detection  Mechanism is configured with '8192' (2<sup>14</sup>) packet for each observation window
 
