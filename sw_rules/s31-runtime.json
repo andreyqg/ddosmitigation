@@ -1,6 +1,6 @@
 {
   "target": "bmv2",
-  "p4info": "build/ddosd.p4.p4info.txt",
+  "p4info": "build/ddosmit.p4.p4info.txt",
   "bmv2_json": "build/ddosmit.json",
   "table_entries": [
     {
