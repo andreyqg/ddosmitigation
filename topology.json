@@ -1,45 +1,22 @@
 {
     "hosts": [
-	"h111","h112","h113","h114","h115",
-	"h121","h122","h123","h124","h125",
-	"h211","h212","h213","h214","h215",
+	"h1",
+	"h2",
+	"h4",
 	"h99"
     ],
     "switches": {
 	"s11": { "runtime_json" : "./sw_rules/s11-runtime.json","cli_input" : "./sw_rules/s11-cli.input" },
-	"s12": { "runtime_json" : "./sw_rules/s12-runtime.json","cli_input" : "./sw_rules/s12-cli.input" },
-	"s13": { "runtime_json" : "./sw_rules/s13-runtime.json" },
-	"s14": { "runtime_json" : "./sw_rules/s14-runtime.json" },
-	"s21": { "runtime_json" : "./sw_rules/s21-runtime.json" },
-	"s22": { "runtime_json" : "./sw_rules/s22-runtime.json" },
-	"s23": { "runtime_json" : "./sw_rules/s23-runtime.json","cli_input" : "./sw_rules/s23-cli.input" },
+	"s21": { "runtime_json" : "./sw_rules/s21-runtime.json","cli_input" : "./sw_rules/s21-cli.input" },
 	"s31": { "runtime_json" : "./sw_rules/s31-runtime.json","cli_input" : "./sw_rules/s31-cli.input" },
-	"s32": { "runtime_json" : "./sw_rules/s32-runtime.json","cli_input" : "./sw_rules/s32-cli.input" },
-	"s33": { "runtime_json" : "./sw_rules/s33-runtime.json","cli_input" : "./sw_rules/s33-cli.input" },
-	"s41": { "runtime_json" : "./sw_rules/s41-runtime.json" },
-	"s42": { "runtime_json" : "./sw_rules/s42-runtime.json","cli_input" : "./sw_rules/s42-cli.input" },
-	"s51": { "runtime_json" : "./sw_rules/s51-runtime.json" },
-	"s52": { "runtime_json" : "./sw_rules/s52-runtime.json" },
-	"s53": { "runtime_json" : "./sw_rules/s53-runtime.json","cli_input" : "./sw_rules/s53-cli.input" }
+	"s41": { "runtime_json" : "./sw_rules/s41-runtime.json","cli_input" : "./sw_rules/s41-cli.input" },
+	"s51": { "runtime_json" : "./sw_rules/s51-runtime.json","cli_input" : "./sw_rules/s51-cli.input" }
     },
     "links": [
-	["h111", "s11"],["h112", "s11"],["h113", "s11"],["h114", "s11"],["h115", "s11"],
-	["h121", "s12"],["h122", "s12"],["h123", "s12"],["h124", "s12"],["h125", "s12"],
-	["h211", "s21"],["h212", "s21"],["h213", "s21"],["h214", "s21"],["h215", "s21"],
-	["h99", "s53"],
-	["s11", "s12"],["s11", "s13"],
-	["s12", "s14"],["s12", "s22"],
-	["s13", "s14"],["s13", "s31"],
-	["s14","s32"],
-	["s21","s23"],["s21","s22"],
-	["s22","s23"],
-	["s23","s41"],
-	["s31","s32"],["s31","s33"],
-	["s32","s33"],
-	["s33","s51"],
-	["s41","s42"],
-	["s42","s52"],
-	["s51","s52"],["s51","s53"],
-	["s52","s53"]
+	["h1", "s11"],["s11", "s31"],
+	["h2", "s21"],["s21", "s31"],
+	["s31", "s51"],
+	["h4", "s41"],["s41", "s51"],
+	["h99", "s51"]
     ]
 }
