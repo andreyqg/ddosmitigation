@@ -9,6 +9,8 @@ First, clone our forked repositories and follow the installation guidelines with
 - [Behavioral Model](https://github.com/andreyqg/behavioral-model)
 - [P4_16 compiler](https://github.com/andreyqg/p4c)
 
+You can use our [install.sh](https://github.com/andreyqg/ddosmitigation/blob/master/install.sh) to install all you need to run our project.
+
 #### Quick Start
 Feel free to do MAKE. This compiles our P4 code, create the network devices in Mininet and load the necessary rules on each switch (via CLI and Runtime).
 
@@ -37,8 +39,3 @@ header ALARM {
     bit<32> ip_alarm;      // IP Address suspects pool for checking
 }
 ```
-The main goal of the proposed mitigation mechanism is once the attack is detected, to identify the suspect IPs, and propagate them to the upstream switches to mitigate the attack each time closer to the source, following a [PushBack Strategy](https://www.researchgate.net/publication/242106891_Controlling_High_Bandwidth_Aggregates_in_the_Network_Extended_Version).
-
-Our Heavy Hitter Detection Mechanism supports '8400' slots and our IPBlockers supports '1400' slots currently. You can change this support into our modified hash functions, before the compiling Behavioral Model and P4C.
-
-
