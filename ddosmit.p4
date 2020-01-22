@@ -11,7 +11,7 @@
 
 #define CS_WIDTH 976
 #define HHD 1400
-#define TOP 5
+#define TOP 8192
 
 const bit<32> NORMAL = 0;
 const bit<32> CLONE = 2; // PKT_INSTANCE_TYPE_EGRESS_CLONE 2
@@ -787,7 +787,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                     meta.hhd_key_carried = hdr.ipv4.srcAddr;
                     meta.hhd_count_carried = 1;
                     //meta.hhd_ow_carried = 0;
-                    meta.hhd_thresh = 2;
+                    meta.hhd_thresh = 82;
                     
                     hash(meta.hhd_index, HashAlgorithm.d1, 32w0, {meta.hhd_key_carried}, 32w0xffffffff);
 
