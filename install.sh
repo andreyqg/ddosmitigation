@@ -98,9 +98,9 @@ git clone git://github.com/mininet/mininet mininet
 sudo ./mininet/util/install.sh -nwv
 
 # --- Protobuf --- #
-git clone https://github.com/google/protobuf.git
+git clone https://github.com/andreyqg/protobuf.git
 cd protobuf
-git checkout ${PROTOBUF_COMMIT}
+#git checkout ${PROTOBUF_COMMIT}
 export CFLAGS="-Os"
 export CXXFLAGS="-Os"
 export LDFLAGS="-Wl,-s"
@@ -116,9 +116,9 @@ sudo python setup.py install
 cd ../..
 
 # --- gRPC --- #
-git clone https://github.com/grpc/grpc.git
+git clone https://github.com/andreyqg/grpc.git
 cd grpc
-git checkout ${GRPC_COMMIT}
+#git checkout ${GRPC_COMMIT}
 git submodule update --init --recursive
 export LDFLAGS="-Wl,-s"
 make -j${NUM_CORES}
