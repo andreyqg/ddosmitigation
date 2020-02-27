@@ -4,7 +4,7 @@ import argparse
 import os
 
 def run_tshark(in_pcap, out_txt):
-    command = "tshark -q -z 'io,stat,1' -r " + in_pcap + " > " + out_txt
+    command = "tshark -q -z 'io,stat,109' -r " + in_pcap + " > " + out_txt
     os.system(command)
 
 def main():
@@ -17,7 +17,7 @@ def main():
     args = parser.parse_args()
 
     assert os.path.isfile(args.in_pcap)
-    assert not os.path.isfile(args.out_csv_gz) 
+    assert not os.path.isfile(args.out_txt) 
         
     run_tshark(args.in_pcap, args.out_txt) 
         
