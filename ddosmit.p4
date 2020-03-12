@@ -769,8 +769,8 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
         }
 
         if(meta.sl_source == meta.sl_read){ 
-            hash(meta.timestamp_hashed, HashAlgorithm.crc16, 32w0, {meta.timestamp}, 32w0x9);
-            if (meta.timestamp_hashed > 420){
+            hash(meta.timestamp_hashed, HashAlgorithm.crc16, 32w0, {meta.timestamp}, 32w0x9); //This generate a number between 0-9 based on packet timestamp
+            if (meta.timestamp_hashed > 2){
                 drop(); /* Block 70% of packet if IP Address match in IP Suspect List */
             }
         }else if(meta.sl_source == meta.il_read){
