@@ -232,6 +232,8 @@ control MyIngress(inout headers hdr,inout metadata meta,inout standard_metadata_
     // Smoothing and Sensitivity Coefficients
     register<bit<8>>(1) alpha;    // Fixed point representation: 0 integer bits, 8 fractional bits.
     register<bit<8>>(1) k;        // Fixed point representation: 5 integer bits, 3 fractional bits.
+    register<bit<8>>(1) k_noattack; /* k value when switch is under attack */
+    register<bit<8>>(1) k_attack; /* k value when switch is NOT under attack */
 
     // Network device status and features
     //register<bit<8>>(1) features;
@@ -341,10 +343,10 @@ control MyIngress(inout headers hdr,inout metadata meta,inout standard_metadata_
                 //     device_status.write(0,1);
                 // } else
                 if (meta.attack == 0){
-                //To halve entropy threshold when is received alarm packet more than one time
-                    bit<8> copy_k;
-                    k.read(copy_k,0);
-                    k.write(0,copy_k/2);
+                //To adjust entropy threshold when is received alarm packet more than one time
+                    bit<8> new_k;
+                    k_attack.read(new_k,0);
+                    k.write(0,new_k);
                     device_status.write(0,2);
                 }
 
@@ -596,7 +598,7 @@ control MyIngress(inout headers hdr,inout metadata meta,inout standard_metadata_
                         meta.alarm = 0;
                         bit<32> training_len_aux;
                         training_len.read(training_len_aux, 0);
-                        training_len.read(meta.training_len, 0);
+                        meta.training_len = training_len_aux;
                         if (current_ow > training_len_aux) {
                             bit<8> k_aux;
                             k.read(k_aux, 0);
