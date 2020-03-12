@@ -12,6 +12,7 @@
 #define CS_WIDTH 976
 #define HHD 1400
 #define TOP 8192
+#define SUSPECT_THRESH 82
 
 const bit<32> NORMAL = 0;
 const bit<32> CLONE = 2; // PKT_INSTANCE_TYPE_EGRESS_CLONE 2
@@ -87,8 +88,8 @@ struct metadata {
     bit<8> first_device; /* Network device identifier 0:Core, 1:Edge */
     bit<8> features; /* Indicates switch features */
     bit<8> attack; /* Network device status 0:Only Forwarding, 1:Mechanism running, 2:Mechanism running and k halved */
-    bit<32> timestamp; /* Ingress timestamp to generate hash and filtering malicious traffic */
-    bit<32> timestamp_hashed; /* Hash of timestamp for filtering */
+    bit<48> timestamp; /* Ingress timestamp to generate hash and filtering malicious traffic */
+    bit<48> timestamp_hashed; /* Hash of timestamp for filtering */
     bit<32> hhd_key_carried; /* Key packet */
     bit<32> hhd_count_carried; /* Counter for packet key */
     bit<32> hhd_ow_carried; /* Observation window for packet key */
@@ -330,7 +331,7 @@ control MyIngress(inout headers hdr,inout metadata meta,inout standard_metadata_
         ack_port.read(meta.ack_port, 0);
         device_status.read(meta.attack,0);
         meta.ingress_port = standard_metadata.ingress_port;
-        meta.timestamp = standard_metadata.enq_timestamp;
+        meta.timestamp = standard_metadata.ingress_global_timestamp;
 
         //To run mechanism only when alarm packet is received
         if (hdr.ipv4.isValid()){
@@ -758,8 +759,17 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
 
         index_total.read(meta.hhd_index_total,0);
 
+        if (meta.trigow == 1 && meta.alarm == 1){
+            meta.key = meta.key + 1;
+            if (meta.mirror_session_id > 0) {
+                clone3(CloneType.E2E, (bit<32>) meta.mirror_session_id, { meta });
+            }
+        }else if (meta.trigow == 1 && meta.alarm == 0){
+                        index_total.write(0,0);
+        }
+
         if(meta.sl_source == meta.sl_read){ 
-            hash(meta.timestamp_hashed, HashAlgorithm.d1, 32w0, {meta.timestamp}, 32w0xffffffff);
+            hash(meta.timestamp_hashed, HashAlgorithm.crc16, 32w0, {meta.timestamp}, 32w0x9);
             if (meta.timestamp_hashed > 420){
                 drop(); /* Block 70% of packet if IP Address match in IP Suspect List */
             }
@@ -787,7 +797,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                     meta.hhd_key_carried = hdr.ipv4.srcAddr;
                     meta.hhd_count_carried = 1;
                     //meta.hhd_ow_carried = 0;
-                    meta.hhd_thresh = 82;
+                    meta.hhd_thresh = SUSPECT_THRESH;
                     
                     hash(meta.hhd_index, HashAlgorithm.d1, 32w0, {meta.hhd_key_carried}, 32w0xffffffff);
 
@@ -858,7 +868,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                                 if (meta.hhd_count_table > meta.hhd_thresh && meta.hhd_index_total < TOP && meta.hhd_ow_table != meta.ow && meta.ack_port != meta.ingress_port){
                                     key_total.write(meta.hhd_index_total,meta.hhd_key_carried);
                                     meta.hhd_index_total = meta.hhd_index_total + 1;
-                                    meta.hhd_ow_table= meta.ow;
+                                    meta.hhd_ow_table = meta.ow;
                                     suspectlist.write(meta.hhd_index,meta.hhd_key_carried);
                                 }
                             } else if (meta.hhd_count_table < meta.hhd_count_carried){
@@ -907,7 +917,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                                 if (meta.hhd_count_table > meta.hhd_thresh && meta.hhd_index_total < TOP && meta.hhd_ow_table != meta.ow && meta.ack_port != meta.ingress_port){
                                     key_total.write(meta.hhd_index_total,meta.hhd_key_carried);
                                     meta.hhd_index_total = meta.hhd_index_total + 1;
-                                    meta.hhd_ow_table= meta.ow;
+                                    meta.hhd_ow_table = meta.ow;
                                     suspectlist.write(meta.hhd_index,meta.hhd_key_carried);
                                 }
                             } else if (meta.hhd_count_table < meta.hhd_count_carried){
@@ -956,7 +966,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                                 if (meta.hhd_count_table > meta.hhd_thresh && meta.hhd_index_total < TOP && meta.hhd_ow_table != meta.ow && meta.ack_port != meta.ingress_port){
                                     key_total.write(meta.hhd_index_total,meta.hhd_key_carried);
                                     meta.hhd_index_total = meta.hhd_index_total + 1;
-                                    meta.hhd_ow_table= meta.ow;
+                                    meta.hhd_ow_table = meta.ow;
                                     suspectlist.write(meta.hhd_index,meta.hhd_key_carried);
                                 }
                             } else if (meta.hhd_count_table < meta.hhd_count_carried){
@@ -1088,14 +1098,6 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                     //######################################################################
                     //######################################################################
 
-                    if (meta.trigow == 1 && meta.alarm == 1){
-                        meta.key = meta.key + 1;
-                        if (meta.mirror_session_id > 0) {
-                            clone3(CloneType.E2E, (bit<32>) meta.mirror_session_id, { meta });
-                        }
-                    } else if (meta.trigow == 1 && meta.alarm == 0){
-                        index_total.write(0,0);
-                    }
                 } else if (standard_metadata.instance_type == CLONE) {
                     meta.key_write_ip = meta.key - 1;
                     write_ip.apply();
