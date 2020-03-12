@@ -42,7 +42,7 @@ def main():
         z=random.randint(1,250)
 
         pkt = pkt =  Ether(src=get_if_hwaddr(iface), dst='ff:ff:ff:ff:ff:ff') / IP(
-            src='100.100.1.14', dst=addr) / TCP(dport=1234, sport=random.randint(49152,65535)) / sys.argv[2]
+            src='111.11.1.{}'.format(z), dst=addr) / TCP(dport=1234, sport=random.randint(49152,65535)) / sys.argv[2]
 
         sendp(pkt, iface=iface)
         sleep(0.01)
