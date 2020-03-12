@@ -1,5 +1,5 @@
 // ###############################################
-// #** DDoS Collaborative Mitigation Mechanism **#  
+// #** DDoS Collaborative Mitigation Mechanism **#
 // ###############################################
 
 /* -*- P4_16 -*- */
@@ -104,7 +104,8 @@ struct metadata {
     bit<32> hhd_ow_swap; /* Observation window carried and table */
     bit<32> hhd_owing_swap; /* Ingress observation window carried in table*/
     bit<32> hhd_swapped; /* Indicator if IP was swapped in previous stage */
-    bit<32> hhd_thresh; /* Heavy Hitter Threshold */
+    //bit<32> hhd_thresh; /* Heavy Hitter Threshold */
+    bit<32> training_len; /*To know when training_len Finished*/
     bit<32> hhd_index_total; /* Position of Heavy Hitter global register */
     bit<32> hhd_aux_index_total; /* Position of Heavy Hitter global register when alarm detected */
     bit<32> hhd_write_key; /* Key readed from Heavy Hitter global register for write in alarm packet */
@@ -595,6 +596,7 @@ control MyIngress(inout headers hdr,inout metadata meta,inout standard_metadata_
                         meta.alarm = 0;
                         bit<32> training_len_aux;
                         training_len.read(training_len_aux, 0);
+                        training_len.read(meta.training_len, 0);
                         if (current_ow > training_len_aux) {
                             bit<8> k_aux;
                             k.read(k_aux, 0);
@@ -716,7 +718,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
         }
         default_action = set_session(0);
     }
-    
+
     action write_mac_addr (macAddr_t srcAddr, macAddr_t dstAddr) {
         hdr.ethernet.srcAddr = srcAddr;
         hdr.ethernet.dstAddr = dstAddr;
@@ -748,7 +750,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
         }
         default_action = drop();
     }
-   
+
     apply {
 
         meta.sl_source = hdr.ipv4.srcAddr;
@@ -768,8 +770,8 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                         index_total.write(0,0);
         }
 
-        if(meta.sl_source == meta.sl_read){ 
-            hash(meta.timestamp_hashed, HashAlgorithm.crc16, 32w0, {meta.timestamp}, 32w0x9); //This generate a number between 0-9 based on packet timestamp
+        if(meta.sl_source == meta.sl_read){
+            hash(meta.timestamp_hashed, HashAlgorithm.crc16, 32w0, {meta.timestamp}, 32w0x9); /*This generates a number between 0-9 based on packet timestamp */
             if (meta.timestamp_hashed > 2){
                 drop(); /* Block 70% of packet if IP Address match in IP Suspect List */
             }
@@ -777,7 +779,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
             suspectlist.write(meta.sl_ind,meta.sl_source);
             key_total.write(meta.hhd_index_total,meta.sl_source);
             meta.hhd_index_total = meta.hhd_index_total + 1;
-            index_total.write(0,meta.hhd_index_total);            
+            index_total.write(0,meta.hhd_index_total);
         } else {
             if (hdr.ipv4.isValid() && meta.alarm_pktin != 1) {
                 write_mac.apply();
@@ -786,7 +788,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                     share_notification.apply();
                 }
 
-                if (standard_metadata.instance_type == NORMAL && meta.recirculated != 1 && meta.features == 1){
+                if (standard_metadata.instance_type == NORMAL && meta.recirculated != 1 && meta.ow > meta.training_len && meta.features == 1){
 
                     //######################################################################
                     //######################################################################
@@ -797,8 +799,8 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                     meta.hhd_key_carried = hdr.ipv4.srcAddr;
                     meta.hhd_count_carried = 1;
                     //meta.hhd_ow_carried = 0;
-                    meta.hhd_thresh = SUSPECT_THRESH;
-                    
+                    //meta.hhd_thresh = SUSPECT_THRESH;
+
                     hash(meta.hhd_index, HashAlgorithm.d1, 32w0, {meta.hhd_key_carried}, 32w0xffffffff);
 
                     // Read key and counter in slot
@@ -817,7 +819,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                     } else if (meta.hhd_owing_table == meta.ow){
                         if (meta.hhd_key_table == meta.hhd_key_carried){
                             meta.hhd_count_table = meta.hhd_count_table + 1;
-                            if (meta.hhd_count_table > meta.hhd_thresh && meta.hhd_index_total < TOP && meta.ack_port != meta.ingress_port && meta.hhd_ow_table != meta.ow){
+                            if (meta.hhd_count_table > SUSPECT_THRESH && meta.hhd_index_total < TOP && meta.ack_port != meta.ingress_port && meta.hhd_ow_table != meta.ow){
                                 key_total.write(meta.hhd_index_total,meta.hhd_key_carried);
                                 meta.hhd_index_total = meta.hhd_index_total + 1;
                                 meta.hhd_ow_table = meta.ow;
@@ -865,7 +867,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                             if (meta.hhd_key_table == meta.hhd_key_carried){
                                 meta.hhd_count_table = meta.hhd_count_table + 1;
                                 meta.hhd_swapped = 0;
-                                if (meta.hhd_count_table > meta.hhd_thresh && meta.hhd_index_total < TOP && meta.hhd_ow_table != meta.ow && meta.ack_port != meta.ingress_port){
+                                if (meta.hhd_count_table > SUSPECT_THRESH && meta.hhd_index_total < TOP && meta.hhd_ow_table != meta.ow && meta.ack_port != meta.ingress_port){
                                     key_total.write(meta.hhd_index_total,meta.hhd_key_carried);
                                     meta.hhd_index_total = meta.hhd_index_total + 1;
                                     meta.hhd_ow_table = meta.ow;
@@ -914,7 +916,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                             if (meta.hhd_key_table == meta.hhd_key_carried){
                                 meta.hhd_count_table = meta.hhd_count_table + 1;
                                 meta.hhd_swapped = 0;
-                                if (meta.hhd_count_table > meta.hhd_thresh && meta.hhd_index_total < TOP && meta.hhd_ow_table != meta.ow && meta.ack_port != meta.ingress_port){
+                                if (meta.hhd_count_table > SUSPECT_THRESH && meta.hhd_index_total < TOP && meta.hhd_ow_table != meta.ow && meta.ack_port != meta.ingress_port){
                                     key_total.write(meta.hhd_index_total,meta.hhd_key_carried);
                                     meta.hhd_index_total = meta.hhd_index_total + 1;
                                     meta.hhd_ow_table = meta.ow;
@@ -963,7 +965,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                             if (meta.hhd_key_table == meta.hhd_key_carried){
                                 meta.hhd_count_table = meta.hhd_count_table + 1;
                                 meta.hhd_swapped = 0;
-                                if (meta.hhd_count_table > meta.hhd_thresh && meta.hhd_index_total < TOP && meta.hhd_ow_table != meta.ow && meta.ack_port != meta.ingress_port){
+                                if (meta.hhd_count_table > SUSPECT_THRESH && meta.hhd_index_total < TOP && meta.hhd_ow_table != meta.ow && meta.ack_port != meta.ingress_port){
                                     key_total.write(meta.hhd_index_total,meta.hhd_key_carried);
                                     meta.hhd_index_total = meta.hhd_index_total + 1;
                                     meta.hhd_ow_table = meta.ow;
@@ -1012,7 +1014,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                             if (meta.hhd_key_table == meta.hhd_key_carried){
                                 meta.hhd_count_table = meta.hhd_count_table + 1;
                                 meta.hhd_swapped = 0;
-                                if (meta.hhd_count_table > meta.hhd_thresh && meta.hhd_index_total < TOP && meta.hhd_ow_table != meta.ow && meta.ack_port != meta.ingress_port){
+                                if (meta.hhd_count_table > SUSPECT_THRESH && meta.hhd_index_total < TOP && meta.hhd_ow_table != meta.ow && meta.ack_port != meta.ingress_port){
                                     key_total.write(meta.hhd_index_total,meta.hhd_key_carried);
                                     meta.hhd_index_total = meta.hhd_index_total + 1;
                                     meta.hhd_ow_table= meta.ow;
@@ -1061,7 +1063,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
                             if (meta.hhd_key_table == meta.hhd_key_carried){
                                 meta.hhd_count_table = meta.hhd_count_table + 1;
                                 meta.hhd_swapped = 0;
-                                if (meta.hhd_count_table > meta.hhd_thresh && meta.hhd_index_total < TOP && meta.hhd_ow_table != meta.ow && meta.ack_port != meta.ingress_port){
+                                if (meta.hhd_count_table > SUSPECT_THRESH && meta.hhd_index_total < TOP && meta.hhd_ow_table != meta.ow && meta.ack_port != meta.ingress_port){
                                     key_total.write(meta.hhd_index_total,meta.hhd_key_carried);
                                     meta.hhd_index_total = meta.hhd_index_total + 1;
                                     meta.hhd_ow_table= meta.ow;
