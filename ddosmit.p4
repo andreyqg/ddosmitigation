@@ -778,7 +778,7 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
         if(meta.sl_source == meta.sl_read){
             hash(meta.timestamp_hashed, HashAlgorithm.crc16, 32w0, {meta.timestamp}, 32w64); /*This generates a number between 0-100 based on packet timestamp */
             if (meta.timestamp_hashed > DROP_PERCENT){
-                //drop(); /* Block 70% of packet if IP Address match in IP Suspect List */
+                drop(); /* Block 70% of packet if IP Address match in IP Suspect List */
             }
         }else if(meta.sl_source == meta.il_read){
             suspectlist.write(meta.sl_ind,meta.sl_source);
@@ -786,7 +786,8 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
             meta.hhd_index_total = meta.hhd_index_total + 1;
             index_total.write(0,meta.hhd_index_total);
         } else {
-            if (hdr.ipv4.isValid() && meta.alarm_pktin != 1  && meta.ow > meta.training_len) {
+            //if (hdr.ipv4.isValid() && meta.alarm_pktin != 1  && meta.ow > meta.training_len) {
+            if (hdr.ipv4.isValid() && meta.alarm_pktin != 1 meta.ow > meta.training_len) {
                 write_mac.apply();
                 if (meta.trigow == 1 && meta.alarm == 1){
                     share_alarm.apply();
