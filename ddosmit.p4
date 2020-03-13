@@ -11,8 +11,9 @@
 
 #define CS_WIDTH 976
 #define HHD 1400
-#define TOP 8192
-#define SUSPECT_THRESH 82
+#define TOP 8192 /* Number of IP address to share into alarm packet*/
+#define SUSPECT_THRESH 82 /* Value to determine suspect IP address*/
+#define DROP_PERCENT 30 /* Value of allowed suspect IP adreesses percent */
 
 const bit<32> NORMAL = 0;
 const bit<32> CLONE = 2; // PKT_INSTANCE_TYPE_EGRESS_CLONE 2
@@ -336,6 +337,9 @@ control MyIngress(inout headers hdr,inout metadata meta,inout standard_metadata_
         meta.ingress_port = standard_metadata.ingress_port;
         meta.timestamp = standard_metadata.ingress_global_timestamp;
 
+        training_len.read(meta.training_len, 0);
+        ow_counter.read(meta.ow, 0);
+
         //To run mechanism only when alarm packet is received
         if (hdr.ipv4.isValid()){
             if (standard_metadata.instance_type == NORMAL && hdr.ipv4.protocol == 0xFD){
@@ -366,7 +370,6 @@ control MyIngress(inout headers hdr,inout metadata meta,inout standard_metadata_
                 // Current Observation Window
                 bit<32> current_ow;
                 ow_counter.read(current_ow, 0);
-                ow_counter.read(meta.ow, 0);
 
                 // Source IP Address Frequency Estimation
 
@@ -598,7 +601,7 @@ control MyIngress(inout headers hdr,inout metadata meta,inout standard_metadata_
                         meta.alarm = 0;
                         bit<32> training_len_aux;
                         training_len.read(training_len_aux, 0);
-                        meta.training_len = training_len_aux;
+
                         if (current_ow > training_len_aux) {
                             bit<8> k_aux;
                             k.read(k_aux, 0);
@@ -773,9 +776,9 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
         }
 
         if(meta.sl_source == meta.sl_read){
-            hash(meta.timestamp_hashed, HashAlgorithm.crc16, 32w0, {meta.timestamp}, 32w0x9); /*This generates a number between 0-9 based on packet timestamp */
-            if (meta.timestamp_hashed > 2){
-                drop(); /* Block 70% of packet if IP Address match in IP Suspect List */
+            hash(meta.timestamp_hashed, HashAlgorithm.crc16, 32w0, {meta.timestamp}, 32w64); /*This generates a number between 0-100 based on packet timestamp */
+            if (meta.timestamp_hashed > DROP_PERCENT){
+                //drop(); /* Block 70% of packet if IP Address match in IP Suspect List */
             }
         }else if(meta.sl_source == meta.il_read){
             suspectlist.write(meta.sl_ind,meta.sl_source);
@@ -783,14 +786,14 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
             meta.hhd_index_total = meta.hhd_index_total + 1;
             index_total.write(0,meta.hhd_index_total);
         } else {
-            if (hdr.ipv4.isValid() && meta.alarm_pktin != 1) {
+            if (hdr.ipv4.isValid() && meta.alarm_pktin != 1  && meta.ow > meta.training_len) {
                 write_mac.apply();
                 if (meta.trigow == 1 && meta.alarm == 1){
                     share_alarm.apply();
                     share_notification.apply();
                 }
 
-                if (standard_metadata.instance_type == NORMAL && meta.recirculated != 1 && meta.ow > meta.training_len && meta.features == 1){
+                if (standard_metadata.instance_type == NORMAL && meta.recirculated != 1 && meta.features == 1){
 
                     //######################################################################
                     //######################################################################
