@@ -786,8 +786,8 @@ control MyEgress(inout headers hdr,inout metadata meta,inout standard_metadata_t
             meta.hhd_index_total = meta.hhd_index_total + 1;
             index_total.write(0,meta.hhd_index_total);
         } else {
-            //if (hdr.ipv4.isValid() && meta.alarm_pktin != 1  && meta.ow > meta.training_len) {
-            if (hdr.ipv4.isValid() && meta.alarm_pktin != 1 meta.ow > meta.training_len) {
+            if (hdr.ipv4.isValid() && meta.alarm_pktin != 1  && meta.ow > meta.training_len) {
+            //if (hdr.ipv4.isValid() && meta.alarm_pktin != 1) {
                 write_mac.apply();
                 if (meta.trigow == 1 && meta.alarm == 1){
                     share_alarm.apply();
