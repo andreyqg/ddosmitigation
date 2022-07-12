@@ -20,7 +20,7 @@ This is the proposed topology, using Mininet.
 
 ![topology](./topology.png)
 
-You can use the [included scripts](https://github.com/andreyqg/ddosmitigation/tree/master/scripts) to test your lab, sending and receiving packet from/to hosts.
+You can use the [included scripts](https://github.com/andreyqg/ddosmitigation/tree/master/scripts) to test your lab, sending and receiving packet from/to hosts. You can also use this [lightweight workload](https://github.com/andreyqg/ddosmitigation/blob/master/fastest.tar.gz) to test connectivity (via the tcpreplay command)
 
 In the folder [sw_rules](https://github.com/andreyqg/ddosmitigation/tree/master/sw_rules) you find the table rules for each switch, they are configured according the topology, if you alter this topology you must update these rules, so that the proper functioning of our mechanism.
 
