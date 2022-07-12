@@ -1,6 +1,8 @@
 # Implementing DDoS Attacks Collaborative Mitigation Mechanism
 
-This project is based on "[Offloading Real-time DDoS Attack Detection to Programmable Data Planes](https://ieeexplore.ieee.org/document/8717869)" (IM 2019) Project from [Ângelo Lapolli](https://github.com/aclapolli) and [Jonatas Marques](https://github.com/jonadmark/)
+This project implementation refers to [BUNGEE: An Adaptive Pushback Mechanism for DDoS Detection and Mitigation in P4 Data Planes (IM 2021)](https://ieeexplore.ieee.org/document/9463992)
+
+Entropy analysis component for DDoS detection, mentioned in our work, is based on [Offloading Real-time DDoS Attack Detection to Programmable Data Planes (IM 2019)](https://ieeexplore.ieee.org/document/8717869) Project from [Ângelo Lapolli](https://github.com/aclapolli) and [Jonatas Marques](https://github.com/jonadmark/)
 
 ### Prerequisites
 We have extended both the behavioral model and the P4 reference compiler (p4c) to support hashing as required by our count sketch (For Attack Detection), in our Heavy Hitters Detection and our Bloom Filter implementation.
@@ -9,14 +11,18 @@ First, clone our forked repositories and follow the installation guidelines with
 - [Behavioral Model](https://github.com/andreyqg/behavioral-model)
 - [P4_16 compiler](https://github.com/andreyqg/p4c)
 
-You can use our [install.sh](https://github.com/andreyqg/ddosmitigation/blob/master/install.sh) to install all you need to run our project.
+You can use our [install.sh](https://github.com/andreyqg/ddosmitigation/blob/master/install.sh) to install all you need to run our project. We strongly recommend use [Linux Ubuntu 18.04 LTS](https://releases.ubuntu.com/18.04/ubuntu-18.04.6-desktop-amd64.iso) since it was the OS where we ran our avaliation.
 
 #### Quick Start
 Feel free to do MAKE. This compiles our P4 code, create the network devices in Mininet and load the necessary rules on each switch (via CLI and Runtime).
 
-This is the proposed topology.
+This is the proposed topology, using Mininet.
 
-![topology](./Topology.png)
+![topology](./topology.png)
+
+You can use the [included scripts](https://github.com/andreyqg/ddosmitigation/tree/master/scripts) to test your lab, sending and receiving packet from/to hosts.
+
+In the folder [sw_rules](https://github.com/andreyqg/ddosmitigation/tree/master/sw_rules) you find the table rules for each switch, they are configured according the topology, if you alter this topology you must update these rules, so that the proper functioning of our mechanism.
 
 The Detection  Mechanism is configured with '8192' (2<sup>14</sup>) packet for each observation window
 
