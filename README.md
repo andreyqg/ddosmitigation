@@ -1,4 +1,8 @@
-# Implementing DDoS Attacks Collaborative Mitigation Mechanism
+# BUNGEE
+
+BUNGEE is an in-network, collaborative pushback mechanism for DDoS attack mitigation that runs entirely in the data plane. This mechanism is able to, locally at a given switch, identify suspect IP addresses (through the use of continuous IP entropy analysis) and propagate them to other switches. The different switches that are made aware of the suspects enforce a pushback strategy for repelling potential attacks.
+
+## Implementing DDoS Attacks Collaborative Mitigation Mechanism
 
 This project implementation refers to [BUNGEE: An Adaptive Pushback Mechanism for DDoS Detection and Mitigation in P4 Data Planes](https://ieeexplore.ieee.org/document/9463992)
 
@@ -6,6 +10,7 @@ Entropy analysis component for DDoS detection, mentioned in our work, is based o
 
 ### Prerequisites
 We have extended both the behavioral model (BM) and the P4 reference compiler (p4c) to support hashing as required by our count sketch (For Attack Detection), in our Heavy Hitters Detection and our Bloom Filter implementation.
+
 First, clone our forked repositories and follow the installation guidelines within:
 
 - [Behavioral Model](https://github.com/andreyqg/behavioral-model)
